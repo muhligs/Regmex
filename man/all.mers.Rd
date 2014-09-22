@@ -6,6 +6,7 @@
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
+This function returns all k-mers given k in alphabetical order
 }
 \usage{
 all.mers(mer)
@@ -13,6 +14,7 @@ all.mers(mer)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{mer}{
+The number k of nucleotides in the k-mers
 %%     ~~Describe \code{mer} here~~
 }
 }
@@ -25,6 +27,7 @@ all.mers(mer)
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
+A character vector of k-mers
 }
 \references{
 %% ~put references to the literature/web site here ~

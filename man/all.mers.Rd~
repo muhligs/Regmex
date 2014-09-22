@@ -1,7 +1,7 @@
 \name{all.mers}
 \alias{all.mers}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{
+\title{function to generate all k mers of a given size
 %%  ~~function to do ... ~~
 }
 \description{
