@@ -14,6 +14,3 @@ n.obs.mot(motif, seq, overlap = TRUE)
 \description{
 Function returning (as numeric) the number of observed motifs in a single sequence or a list of sequences.
 }
-\seealso{
-\code{\link{n.obs.mot}}
-}
