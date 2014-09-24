@@ -1,8 +1,8 @@
 motif.list.p <-
 function(seqlist, motiflist, cores=1, mode="bb", order=1, exact=TRUE, overlap = TRUE){ # include
 	ptm <- proc.time()
-if	(!(mode %in% c("bb","msr","rw"))){stop("mode should be one of 'bb'(default), 'msr' or 'rw'")}
-if(mode == "mhg"){# in development
+if	(!(mode %in% c("bb","mw","rw","mhg"))){stop("mode should be one of 'bb'(default), 'mw' 'rw' or 'mhg'")}
+if(mode == "mhg"){
 	length.ml <- length(motiflist)
 		cat("preparing ",length.ml," motifs","\n")
 	cat(paste("start ",Sys.time()),"\n")
