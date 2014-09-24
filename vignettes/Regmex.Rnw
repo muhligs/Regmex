@@ -1,0 +1,473 @@
+
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+%#\
+
+\title{Regmex package example (Version 1.0)}
+\author{Morten Muhlig Nielsen}
+\maketitle
+
+This is a demo for using the \verb@Regmex@ package in R.
+\verb@Regmex@ is a package developed for analysing motifs in ranked lists of DNA or RNA sequences.
+\verb@Regmex@ make use of regular expressions to define motifs and can be used to evaluate rank correlation of the motif in the sequences. 
+Alternatively it can evaluate clustering of a motif anywhere in a list of sequences.
+
+To load \verb@Regmex@:
+
+<<two>>=
+library("Regmex")
+@
+<<foo,echo=FALSE,results=hide>>=
+options(width=70)
+@
+
+
+To get us started, we need first a list of sequences. 
+These could be the result of a biological experiment, e.g. an expression study.
+The package come with a simulated dataset \verb@seqlist@ which consists of a list of sequences in plain text format that we can imagine coming from an experimental setting.
+
+<<two>>=
+data(seqlist)
+@
+
+The sequences are ranked according to the experimental setting beforehand, but this could alternatively be done in R as well.
+The data set consists of 1000 sequences of length 100 nucleotides\\
+
+\noindent\verb@> seqlist[[1]]@
+<<two,echo=FALSE>>=
+#head(seqlist,3)
+#strsplit(split = "G",seqlist[[1]][1])
+cat('[1] \"',substr(seqlist[[1]][1],1,60),"\n     ",substr(seqlist[[1]][1],61,100),'\"',sep="")
+#cat(substr(seqlist[[1]][1],71,100))
+#writeLines(strwrap(capture.output(seqlist[[1]])))
+#cat(paste(strwrap(seqlist[[1]][1], width = 70), collapse = "\\\\\n"), "\n")
+@
+
+We need to convert the sequence list into a format that Regmex handles. 
+This format contains the sequences in a list with associated statistics needed for subsequent rank or clustering calculations.
+We use the \verb@seq.list.con()@ command for this purpose:
+
+<<two>>=
+seqlist <- seq.list.con(seqlist)
+names(seqlist[[1]])
+# the di nucleotide frequency e.g.:
+seqlist[[1]]$freq.di
+@
+
+The \verb@seq.list.con()@ function also has parallel functionality relevant for large sequences or long sequence lists, e.g.\\
+
+\noindent\verb@> seqlist <- seq.list.con(seqlist, cores = 8)@\\
+
+If we are interested in evaluation of rank correlation for a specific motif, we can use the \verb@motif.p()@ function to calculate a $p$-value for the rank correlation.
+The two motifs ATGCT and GGCTT has been enriched among the first 100 sequences in \verb@seqlist@, and thus have low $p$-values:
+<<two>>=
+motif.p(seqlist, "ATGCT")
+motif.p(seqlist, "GGCTT")
+motif.p(seqlist, "GACTT") # not enriched
+@
+
+We can exploit the regular expression capability of \verb@Regmex@ and look for either of the two motifs at the same time:
+
+<<two>>=
+motif.p(seqlist, "(ATGCT)|(GGCTT)")
+@
+
+Here we see an increased significance relative to either motif alone, as expected. 
+
+We can also use a regular expression to look for a composite motif consisting of the two motifs found together in the same sequence. 
+This would look like:
+
+<<two>>=
+motif.p(seqlist, "(ATGCT)(A|C|G|T)*(GGCTT)") # ATGCT followed by GGCTT
+motif.p(seqlist, "(GGCTT)(A|C|G|T)*(ATGCT)") # GGCTT followed by ATGCT
+motif.p(seqlist, "((ATGCT)(A|C|G|T)*(GGCTT))|((GGCTT)(A|C|G|T)*(ATGCT))") 
+# motifs together in both orientations.
+@
+
+Since we get a low significance, the motifs does not seem to be enriched as a composite motif, which is also not expected, since the two motifs were enriched independently in the sequences. 
+We can create a new sequence list and enrich it with a composite motif like this:
+<<two>>=
+set.seed(1)
+seqlist2 <- lapply(1:1000,function(x)paste(sample(c("G","C","A","T"),replace = T,100),collapse=""))
+for(s in sample(1:100,30)){
+	pos <- sample(1:95,1)	
+	substring(seqlist2[[s]],pos,pos+5) <- "ATGCT"
+ pos <- sample(1:95,1)	
+ substring(seqlist2[[s]],pos,pos+5) <- "GGCTT"
+}
+seqlist2 <- seq.list.con(seqlist2, cores = 8)
+@
+
+And now:
+<<two>>=
+motif.p(seqlist2, "(ATGCT)(A|C|G|T)*(GGCTT)") # ATGCT followed by GGCTT
+motif.p(seqlist2, "(GGCTT)(A|C|G|T)*(ATGCT)") # GGCTT followed by ATGCT
+motif.p(seqlist2, "((ATGCT)(A|C|G|T)*(GGCTT))|((GGCTT)(A|C|G|T)*(ATGCT))") 
+# motifs together in both orientations.
+@
+
+Here we see an enrichment of the two motifs occurring together in both orientations, as expected by design.
+
+\verb@Regmex@ can be used to exhaustively evaluate rank correlation for a long list of motifs. 
+For this we use the \verb@motif.list.p()@ function. 
+An example could be all 5-mers. For convenience, \verb@Regmex@ has a function to generate all k-mers, \verb@all.mers()@.
+
+<<two>>=
+all.mers(2)
+@
+
+
+\noindent\verb@> res5 <- motif.list.p(seqlist2, all.mers(5),cores=8)@\\
+\noindent\verb@# total time (s):  185.632 (variable, depending on your system)@
+<<two,echo=FALSE>>=
+data(res5)
+@
+<<two>>=
+head(res5[order(res5)])
+@
+
+<<label=fig1plot2,include=FALSE, echo=FALSE>>=
+plot(1:1024,-log(res5,10),ylab="motif -log(p-value)",xlab="motif index")
+idx <- -log(res5,10)>1
+#names(res5)[idx]
+text((1:1024)[idx],(-log(res5,10))[idx], names(res5)[idx],pos=4,cex=0.6)
+@
+\begin{figure}
+\begin{center}
+<<label=figopt,fig=TRUE,echo=FALSE>>=
+<<fig1plot2>>
+@
+\end{center}
+\caption{All 5-mer rank correlation $p$-values}
+\label{fig:opt}
+\end{figure}
+
+We see in Figure 1 that the two most significantly correlated motifs are the ones that were added, and that some of the others overlap the ends of the added motifs, e.g. GCTTG and GTCAT. 
+
+\verb@Regmex@ comes with three flavors of rank correlation evaluations. One is based on Brownian bridge theory, another is based on random walk theory and a third is based on a modified sum of rank test. 
+The choice is given in the \verb@mode@ parameter as "bb", "rw" or "msr". Brownian bridge is the default mode.
+<<two>>=
+motif.p(seqlist2, "ATGCT", mode = "bb")
+motif.p(seqlist2, "ATGCT", mode = "rw")
+motif.p(seqlist2, "ATGCT", mode = "msr")
+@
+
+The three ways of evaluating rank correlation are different in how the null model is defined and in sensitivity in different sequence and motif scenarios. 
+Most importantly, the random walk method is sensitive to clustering of motifs anywhere in the sequence list, and thus can be used to detect local runs of motifs anywhere in the list of sequences. \\
+
+\verb@Regmex@ contains a number of additional function relevant for analyzing motifs. One of them is a function that returns the number of observed motifs along the sequence list:
+<<two>>=
+head(n.obs.mot("ATGCT", seqlist2),30)
+tail(n.obs.mot("ATGCT", seqlist2),30)
+@
+
+Another useful function \verb@align.motif()@  extracts the motifs from the sequences whit optional flanking bases, which allows an alignment of the motifs, e.g.:
+
+<<two>>=
+cat(head(align.motif("AT(G|C)CT",seqlist2,lf = 2, rf = 4), 15),sep="\n")
+@
+
+Here a left flank of two nucleotides and right flank of four nucleotides was used with a regular expression motif capturing the enriched motif and a mismatch motif.
+In this way it is possible to inspect the individual motif occurrences and perhaps infer additional relevant parts of a motif. 
+
+\verb@Regmex@ includes a function \verb@seqs.motifs()@ which can be used to extract all k-mers from one or more sequences. 
+This is relevant for evaluating rank correlation for the subset of k-mers defined by one or more sequences only. 
+An example could be evaluationg correlations for all k-mers contained in an RNA molecule that is suspected to function through some RNA interference mechanism.
+
+<<two>>=
+motifs <- motifs.seqs(tail(seqlist2,1),7)
+# all 7-mer motifs occurring in the first sequence from the end
+@
+This set of motif could be revers complimented with \verb@rev.motifs <- rev.comp(motifs)@ if needed, and a rank correlation evaluation would be done with:\\
+\noindent\verb@> rnai.set <- motif.list.p(seqlist2, rev.motifs, cores=8)@\\
+
+Finally, \verb@Regmex@ has a plot function to visualize a set of found motifs and find clusters within them. 
+The function l.clust will cluster motifs based on their Levensthein distances, draw a cluster dendrogram (if plot=TRUE) and list the motifs and their cluster associations.
+
+We here try to cluster observations of the two enriched motifs ATGCT and GGCTT flanked by two additional nucleotides at both ends. First we define the set of motifs using align.motif:
+
+<<two>>=
+motifs <- 
+	c(align.motif(motif = "ATGCT",seqlist = seqlist2, lf = 2, rf = 2)[1:20], 
+	align.motif(motif = "GGCTT",seqlist = seqlist2, lf = 2, rf = 2)[1:20])
+@
+We now have 20 of each motif occurrence, and we expect these to separate into two clusters defined by each motif.
+
+\noindent\verb@> mot.clusters <- l.clust(set = motifs, k = 6, plot=TRUE)@
+<<label=fig2plot2,include=FALSE, echo=FALSE>>=
+mot.clusters <- l.clust(set = motifs, k = 6, plot=TRUE)
+@
+\begin{figure}
+\begin{center}
+<<label=figtpt,fig=TRUE,echo=FALSE>>=
+<<fig2plot2>>
+@
+\end{center}
+\caption{Cluster dendrogram of observed motifs}
+\label{fig:tpt}
+\end{figure}
+
+<<two>>=
+head(mot.clusters)
+@
+
+As expected the two enriched motifs define two distinct clusters. Six clusters were produces for illustration, the dendrogram clearly suggests two clusters. 
+
+
+
+\end{document}
+
+To get started make a regular \LaTeX\ file (like this one) but
+give it the suffix \verb@.Rnw@ instead of \verb@.tex@ and then
+turn it into a \LaTeX\ file (\verb@foo.tex@) with the (unix) command
+\begin{verbatim}
+R CMD Sweave foo.Rnw
+\end{verbatim}
+So you can do
+\begin{verbatim}
+latex foo
+xdvi foo
+\end{verbatim}
+and so forth.
+
+So now we have a more complicated file chain
+$$
+\begin{CD}
+   \texttt{foo.Rnw}
+   @>\texttt{Sweave}>>
+   \texttt{foo.tex}
+   @>\texttt{latex}>>
+   \texttt{foo.dvi}
+   @>\texttt{xdvi}>>
+   \text{view of document}
+\end{CD}
+$$
+and what have we accomplished other than making it twice as annoying
+to the WYSIWYG crowd (having to run both \verb@Sweave@ and \verb@latex@
+to get anything that looks like the document)?
+
+Well, we can now include R in our document.  Here's a simple example
+<<two>>=
+2 + 2
+@
+What I actually typed in \verb@foo.Rnw@ was
+\begin{tabbing}
+\verb@<<two>>=@ \\
+\verb@2 + 2@ \\
+\verb+@+ \\
+\end{tabbing}
+This is not \LaTeX.  It is a ``code chunk'' to be processed by \verb@Sweave@.
+When \verb@Sweave@ hits such a thing, it processes it, runs R to get the
+results, and stuffs (by default) the output in the \LaTeX\ file it is
+creating.  The \LaTeX\ between code chunks is copied verbatim (except
+for \verb@Sexpr@, about which see below).  Hence to create a Rnw document
+you just write plain old \LaTeX\ interspersed with ``code chunks'' which
+are plain old R.
+
+\pagebreak[3]
+Plots get a little more complicated.  First we make something to plot
+(simulate regression data).
+<<reg>>=
+n <- 50
+x <- seq(1, n)
+a.true <- 3
+b.true <- 1.5
+y.true <- a.true + b.true * x
+s.true <- 17.3
+y <- y.true + s.true * rnorm(n)
+out1 <- lm(y ~ x)
+summary(out1)
+@
+(for once we won't show the code chunk itself, look at \verb@foo.Rnw@
+if you want to see what the actual code chunk was).
+
+Figure~\ref{fig:one} (p.~\pageref{fig:one})
+is produced by the following code
+<<label=fig1plot,include=FALSE>>=
+plot(x, y)
+abline(out1)
+@
+\begin{figure}
+\begin{center}
+<<label=fig1,fig=TRUE,echo=FALSE>>=
+<<fig1plot>>
+@
+\end{center}
+\caption{Scatter Plot with Regression Line}
+\label{fig:one}
+\end{figure}
+Note that \verb@x@, \verb@y@, and \verb@out1@ are remembered from
+the preceding code chunk.  We don't have to regenerate them.
+All code chunks are part of one R ``session''.
+
+Now this was a little tricky.  We did this with two code chunks,
+one visible and one invisible.  First we did
+\begin{tabbing}
+\verb@<<label=fig1plot,include=FALSE>>=@ \\
+\verb@plot(x, y)@ \\
+\verb@abline(out1)@ \\
+\verb+@+
+\end{tabbing}
+where the \verb@include=FALSE@ indicates that the output (text and graphics)
+should not go here (they will be some place else) and the \verb@label=fig1plot@
+gives the code chunk a name (to be used later).  And ``later'' is almost
+immediate.  Next we did
+\begin{tabbing}
+\verb@\begin{figure}@ \\
+\verb@\begin{center}@ \\
+\verb@<<label=fig1,fig=TRUE,echo=FALSE>>=@ \\
+\verb@<<fig1plot>>@ \\
+\verb+@+ \\
+\verb@\end{center}@ \\
+\verb@\caption{Scatter Plot with Regression Line}@ \\
+\verb@\label{fig:one}@ \\
+\verb@\end{figure}@
+\end{tabbing}
+In this code chunk the \verb@fig=TRUE@ indicates that the chunk
+generates a figure.  \verb@Sweave@ automagically makes both EPS and PDF
+files for the figure and automagically generates an
+appropriate \LaTeX\ \verb@\includegraphics@ command
+to include the plot in the \verb@figure@ environment.
+The \verb@echo=FALSE@ in the code chunk means just what it says
+(we've already seen the code---it was produced by the preceding chunk---and
+we don't want to see it again, especially not in our figure).
+The \verb@<<fig1plot>>@ is an example of ``code chunk reuse''.
+It means that we reuse the code of the code chunk named \verb@fig1plot@.
+It is important that we observe the DRY/SPOT rule (\emph{don't repeat yourself}
+or \emph{single point of truth}) and only have one bit of code for generating
+the plot.  What the reader sees is guaranteed to be the code that made the
+plot.  If we had used cut-and-paste, just repeating the code, the duplicated
+code might get out of sync after edits.
+The rest of this should be recognizable to anyone who has ever
+done a \LaTeX\ figure.
+
+So making a figure is a bit more complicated in some ways but much simpler
+in others.  Note the following virtues
+\begin{itemize}
+\item The figure is guaranteed to be the one described by the text
+(at least by the R in the text).
+\item No messing around with sizing or rotations.  It just works!
+\end{itemize}
+
+\begin{figure}
+\begin{center}
+<<label=fig2,fig=TRUE,echo=FALSE>>=
+out3 <- lm(y ~ x + I(x^2) + I(x^3))
+plot(x, y)
+curve(predict(out3, newdata=data.frame(x=x)), add = TRUE)
+@
+\end{center}
+\caption{Scatter Plot with Cubic Regression Curve}
+\label{fig:two}
+\end{figure}
+Note that if you don't care to show the R code to make the figure,
+it is simpler still.  Figure~\ref{fig:two} (p.~\pageref{fig:two})
+shows another plot.
+What I actually typed in \verb@foo.Rnw@ was
+\begin{tabbing}
+\verb@\begin{figure}@ \\
+\verb@\begin{center}@ \\
+\verb@<<label=fig2,fig=TRUE,echo=FALSE>>=@ \\
+\verb@out3 <- lm(y ~ x + I(x^2) + I(x^3))@ \\
+\verb@plot(x, y)@ \\
+\verb@curve(predict(out3, newdata=data.frame(x=x)), add = TRUE)@ \\
+\verb+@+ \\
+\verb@\end{center}@ \\
+\verb@\caption{Scatter Plot with Cubic Regression Curve}@ \\
+\verb@\label{fig:two}@ \\
+\verb@\end{figure}@
+\end{tabbing}
+Now we just included the code for the plot in the figure
+(with \verb@echo=FALSE@ so it doesn't show).
+
+Also note that every time we rerun \verb@Sweave@ Figures~\ref{fig:one}
+and~\ref{fig:two} change, the latter conspicuously (because the simulated
+data are random).  Everything
+just works.  This should tell you the main virtue of Sweave.
+It's always correct.  There is never a problem with stale
+cut-and-paste.
+
+<<foo,echo=FALSE,results=hide>>=
+options(scipen=10)
+@
+Simple numbers can be plugged into the text with the \verb@\Sexpr@
+command, for example, the quadratic and cubic regression coefficients
+in the preceding regression were
+$\beta_2 = \Sexpr{round(out3$coef[3], 4)}$
+and
+$\beta_3 = \Sexpr{round(out3$coef[4], 4)}$.
+Just magic!
+What I actually typed in \verb@foo.Rnw@ was
+\begin{tabbing}
+\verb@in the preceding regression@ \\
+\verb@were $\beta_2 = \Se@\verb@xpr{round(out3$coef[3], 4)}$@ \\
+\verb@and $\beta_3 = \Se@\verb@xpr{round(out3$coef[4], 4)}$.@
+\end{tabbing}
+<<foo2,echo=FALSE,results=hide>>=
+options(scipen=0)
+@
+
+The \verb@xtable@ command is used to make tables.  (The following
+is the \verb@Sweave@ of another code chunk that we don't explicitly
+show.  Look at \verb@foo.Rnw@ for details.)
+<<blurfle>>=
+out2 <- lm(y ~ x + I(x^2))
+foo <- anova(out1, out2, out3)
+foo
+class(foo)
+dim(foo)
+foo <- as.matrix(foo)
+foo
+@
+So now we are ready to turn the matrix \verb@foo@
+into Table~\ref{tab:one}
+<<label=tab1,echo=FALSE,results=tex>>=
+library(xtable)
+print(xtable(foo, caption = "ANOVA Table", label = "tab:one",
+    digits = c(0, 0, 2, 0, 2, 3, 3)), table.placement = "tbp",
+    caption.placement = "top")
+@
+using the R chunk
+\begin{tabbing}
+\verb@<<label=tab1,echo=FALSE,results=tex>>=@ \\
+\verb@library(xtable)@ \\
+\verb@print(xtable(foo, caption = "ANOVA Table", label = "tab:one",@ \\
+\verb@    digits = c(0, 0, 2, 0, 2, 3, 3)), table.placement = "tbp",@ \\
+\verb@    caption.placement = "top")@ \\
+\verb+@+
+\end{tabbing}
+(note the difference between arguments to the \verb@xtable@ function
+and to the \verb@xtable@ method of the \verb@print@ function).
+
+To summarize, \verb@Sweave@ is terrific, so important that soon
+we'll not be able to get along without it.  It's virtues are
+\begin{itemize}
+\item The numbers and graphics you report are actually what they
+are claimed to be.
+\item Your analysis is reproducible.  Even years later, when you've
+completely forgotten what you did, the whole write-up, every single
+number or pixel in a plot is reproducible.
+\item Your analysis actually works---at least in this particular instance.
+The code you show actually executes without error.
+\item Toward the end of your work, with the write-up almost done you
+discover an error.  Months of rework to do?  No!  Just fix the error
+and rerun \verb@Sweave@ and \verb@latex@.  One single problem like
+this and you will have all the time invested in \verb@Sweave@ repaid.
+\item This methodology provides discipline.
+There's nothing that will make you clean up your code like
+the prospect of actually revealing it to the world.
+\end{itemize}
+
+Whether we're talking about homework, a consulting report, a textbook,
+or a research paper.  If they involve computing and statistics,
+this is the way to do it.
+
+\end{document}
