@@ -9,5 +9,5 @@ rect.hclust(hc,k=k)
 res <- 	data.frame(cutree(hc,k=k))
 rownames(res) <- 	as.character(set)
 colnames(res)[1] <- "cluster"
-return()
+return(res)
 }
