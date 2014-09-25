@@ -13,25 +13,26 @@ motif.p(seqlist, motif, overlap = TRUE, mode = "bb", cores = 1, sub.method = "p.
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{seqlist}{
-%%     ~~Describe \code{seqlist} here~~
+A list of ranked sequences in which the motif rank correlation is calculated. 
+The sequence list should be a list object containing 'seq' objects or character strings.
 }
   \item{motif}{
-%%     ~~Describe \code{motif} here~~
+A motif defined as a regular expression, e.g. "A(G|A)G*(C|T)CT". Must be a character string.
 }
   \item{overlap}{
-%%     ~~Describe \code{overlap} here~~
+Logical, are motifs allowed to overlap in the sequences.
 }
   \item{mode}{
-%%     ~~Describe \code{mode} here~~
+One of "bb", "rw" or "msr" depending on the correlation evaluation method.
 }
   \item{cores}{
-%%     ~~Describe \code{cores} here~~
+Number of cores to use in parallel.
 }
   \item{sub.method}{
 %%     ~~Describe \code{sub.method} here~~
 }
   \item{order}{
-%%     ~~Describe \code{order} here~~
+1 or 2 for mono-nucleotide or di-nucleotide dependency of sequence specific p-value calculation.
 }
   \item{exact}{
 %%     ~~Describe \code{exact} here~~

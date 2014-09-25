@@ -3,12 +3,11 @@
 \alias{Regmex}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Regular expression motif explorer. 
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Regmex is a flexible motif analysis package that evaluates rank correlation or clustering of motifs in lists of nucleotide sequences.
+Motifs can be defined as regular expressions and Regmex evaluates accurate p-values for motif observations in sequences using embedded Markov models.
 }
 \details{
 \tabular{ll}{
@@ -16,25 +15,26 @@ Package: \tab Regmex\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2014-09-11\cr
-License: \tab What license is it under?\cr
+License: \tab GPL-2\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+The package contains the main functions motif.p() and motif.list.p() for evaluating rank correlation of a motif or a list of motifs in a list of sequences.
 }
 \author{
-Who wrote it
+Morten Muhlig Nielsen, Paula Tataru
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer:\cr Morten Muhlig Nielsen \cr morten.muhlig@clin.au.dk
+
 }
 \references{
-~~ Literature or other references for background information ~~
+Regmex, Motif discovery in ranked lists of sequences. (submitted)
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
+~~ O  ptionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+vignette("Regmex")
 }
 \examples{
-~~ simple examples of the most important functions ~~
+data(seqlist)
+motif <- "ACG(C|G)TT"
+motif.p(seqlist, motif)
 }
