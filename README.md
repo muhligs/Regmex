@@ -1,2 +1,8 @@
-#test
-# this is the 2. commit.
+Regmex is a package for evaluationg motif rank correlation in a list of ranked DAN or RNA sequences.
+It handles regular expressions for motif definition, and thus allows for evaluation of quite complex motifs.
+Also it makes use of embedded Markov models to calculate accurate motif observation probabilities in sequences.
+
+To install:
+
+the latest development version: install_github("muhligs/Regmex")
+
