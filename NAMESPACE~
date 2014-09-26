@@ -1,2 +1,0 @@
-export(motif.p, motif.list.p, n.obs.mot, rev.comp, all.mers, align.motif, l.clust, mot.chop, motifs.seqs, prob.dist, list.prob, seq.list.con)
-import(expm, parallel)
