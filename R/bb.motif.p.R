@@ -5,14 +5,11 @@ if(sum(p.values!=1)==0){return(list("p.value"=1,"z"=0,"rs"=rep(0,length(p.values
 lmean<-mean(ls)
 #define a running sum of the log score: r(i)=r(i-1) + ls[i-1]-lmean
 lp <- length(p.values)
-rs=rep(0,lp+1)
-for(i in 2:(lp+1)){
-rs[i]=rs[i-1]+ls[i-1]-lmean #
-}
-	#alternative: (there is a bug in this:)
-
-#	cs <- cumsum(ls)
-#	rs <- c(cs-ls[1]-cs[lp]*(0:(lp-1))/lp,0)
+#rs=rep(0,lp+1)
+rs <- cumsum(ls)
+#for(i in 2:(lp+1)){ # this was removed for efficiency and replaced with the cumsum command above.
+#rs[i]=rs[i-1]+ls[i-1]-lmean #
+#}
 # get max
 #print(rs)
 #	print(lmean)
