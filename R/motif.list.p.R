@@ -1,5 +1,5 @@
 motif.list.p <-
-function(seqlist, motiflist, cores=1, mode="bb", order=1, exact=TRUE, overlap = TRUE){ # include
+function(seqlist, motiflist, cores=1, mode="bb", order=1, exact=TRUE, overlap = TRUE, alpha=0.00001){ # include
 	ptm <- proc.time()
 if	(!(mode %in% c("bb","msr","rw"))){stop("mode should be one of 'bb'(default), 'msr' or 'rw'")}
 if(mode == "mhg"){# in development
@@ -75,7 +75,7 @@ if	(class(motiflist3[[1]])!="pattern"){stop("motif should be character vector or
 #		idx <- idx + 1
 		start <- end+1
 		end <- round(i/100*length.ml,0)
-		vec <- unlist(mclapply(motiflist3[start:end], function(x)motif.p(seqlist, x, mode=mode, order=order, exact=exact, overlap = overlap), mc.cores=cores))
+		vec <- unlist(mclapply(motiflist3[start:end], function(x)motif.p(seqlist, x, mode=mode, order=order, exact=exact, overlap = overlap, alpha=alpha), mc.cores=cores))
 #	motiflist2 <- mclapply(motiflist[start:end],function(motif)pat.con(motif),mc.cores=cores)
 #motiflist3 <- append(motiflist3,motiflist2)	
 				cat(i,"%.. ",sep="")
