@@ -1,6 +1,6 @@
 wcmod.p <-
-function(p,n){ #include
-l<--log(1-p)
+function(p,n, alpha=0.000001){ #include
+l<--log(1-p+alpha)
 c.l<-cumsum(l)
 r<-(c(0,c.l[-length(c.l)])+c.l)/2	
 	n.t<-sum(n)
