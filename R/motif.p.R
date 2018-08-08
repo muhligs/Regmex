@@ -36,5 +36,5 @@ n.obs<-sapply(values,function(x)return(x$n.obs.patterns))
 	if(mode=="rw"){if(sub.method=="p.value") return(rw.motif.p(p.values, ...)$p.value) else return(rw.motif.p(p.values, ...))}
 	if(mode=="bb"){if(sub.method=="p.value") return(bb.motif.p(p.values,exact=exact, alpha=alpha)$p.value) else return(bb.motif.p(p.values,exact=exact, alpha=alpha))}
 	if(mode=="rs"){if(sub.method=="p.value") return(rs.motif.p(p.values)) else return(rs.motif.p(p.values, rs.out="all"))}
-	if(mode=="msr"){return(wcmod.p(p.values,n.obs))}
+	if(mode=="msr"){return(wcmod.p(p.values,n.obs,alpha))}
 }
