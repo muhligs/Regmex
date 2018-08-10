@@ -1,5 +1,5 @@
 motif.p <-
-function(seqlist, motif, overlap=FALSE, mode="bb",cores=1, sub.method="p.value", order=1, exact=TRUE, alpha=0.00001,...){ # include
+function(seqlist, motif, overlap=FALSE, mode="bb",cores=1, sub.method="p.value", order=1, exact=FALSE, alpha=0.00001,...){ # include
 	#if("flag.motif.list.p" %in% ls(envir = sys.frame(-1))){} else {
 if	(!(mode %in% c("bb","msr","rw"))){stop("mode should be one of 'bb'(default), 'msr' or 'rw'")}
 if(mode == "mhg"){# in dev.
@@ -36,5 +36,5 @@ n.obs<-sapply(values,function(x)return(x$n.obs.patterns))
 	if(mode=="rw"){if(sub.method=="p.value") return(rw.motif.p(p.values, ...)$p.value) else return(rw.motif.p(p.values, ...))}
 	if(mode=="bb"){if(sub.method=="p.value") return(bb.motif.p(p.values,exact=exact, alpha=alpha)$p.value) else return(bb.motif.p(p.values,exact=exact, alpha=alpha))}
 	if(mode=="rs"){if(sub.method=="p.value") return(rs.motif.p(p.values)) else return(rs.motif.p(p.values, rs.out="all"))}
-	if(mode=="msr"){return(wcmod.p(p.values,n.obs,alpha))}
+	if(mode=="msr"){return(wcmod.p(p.values,n.obs))}
 }
