@@ -1,5 +1,5 @@
 motif.list.p <-
-function(seqlist, motiflist, cores=1, mode="bb", order=1, exact=TRUE, overlap = TRUE, alpha=0.00001){ # include
+function(seqlist, motiflist, cores=1, mode="bb", order=1, exact=FALSE, overlap =FALSE, alpha=0.00001){ # include
 	ptm <- proc.time()
 if	(!(mode %in% c("bb","msr","rw"))){stop("mode should be one of 'bb'(default), 'msr' or 'rw'")}
 if(mode == "mhg"){# in development
