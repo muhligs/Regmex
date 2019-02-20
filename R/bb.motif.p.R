@@ -9,10 +9,7 @@ lp <- length(p.values)
 # sd of ls
 sdls<-sd(ls)
 rs <- cumsum(ls)
-}
 # get max
-#print(rs)
-#	print(lmean)
 maxR <- max(abs(rs))
 direction <- ifelse(max(rs)==maxR,1,-1) # added 2019-02-20
 if(exact==FALSE){
