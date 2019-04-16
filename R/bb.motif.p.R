@@ -1,7 +1,7 @@
 bb.motif.p <-
 function(p.values,alpha=0,exact=TRUE,dist=NULL){ #include
 if(sum(p.values!=1)==0){return(list("p.value"=1,"z"=0,"rs"=rep(0,length(p.values)+1), "pvals"=p.values))}
-	ls=-log(ifelse(p.values+alpha<1,p.values+alpha,p.values))
+	ls=-log(ifelse(p.values<alpha,alpha,p.values))
 lmean<-mean(ls)
 ls <- ls - lmean  #new
 #define a running sum of the log score: r(i)=r(i-1) + ls[i-1]-lmean
