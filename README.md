@@ -1,3 +1,7 @@
+\name{Regmex}
+\alias{Regmex}
+\docType{package}
+\title{Regmex}
 \description{
 Regmex is a package for evaluation of motif rank correlation in a list of ranked DNA or RNA sequences.
 It handles regular expressions for motif definition, and thus allows for evaluation of quite complex motifs.
