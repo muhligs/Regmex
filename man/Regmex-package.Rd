@@ -28,7 +28,7 @@ Maintainer:\cr Morten Muhlig Nielsen \cr morten.muhlig@clin.au.dk
 \references{
 Regmex, Motif discovery in ranked lists of sequences. (submitted)
 }
-~~ O  ptionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
+
 \keyword{ package }
 \seealso{
 vignette("Regmex")
