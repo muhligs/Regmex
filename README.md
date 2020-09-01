@@ -5,7 +5,7 @@ Also it makes use of embedded Markov models to calculate accurate motif observat
 
 To install:
 
-the latest development version: install_github("muhligs/Regmex")
+the latest development version: devtools::install_github("muhligs/Regmex")
 }
 
 For details see: 
